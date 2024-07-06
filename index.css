@@ -45,7 +45,7 @@ input.google-search {
   
 }
 .search-section{
-  margin-bottom: 50px;
+  margin-bottom: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -116,7 +116,7 @@ input[type="text"]:focus {
   border-radius: 50px; /* 둥근 모서리 */
   box-shadow: 0 1px 6px rgba(32,33,36,0.28); /* 그림자 */
   outline: none; /* 외곽선 제거 */
-  margin-bottom: 30px;
+  margin-bottom: 80px;
 }
 
 .todo-header h2 {
