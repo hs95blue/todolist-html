@@ -12,21 +12,28 @@
     <div class="section-container">
       <section class="search-section">
         <div class="header">
-          <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo" class="google-logo">
-          <input type="text" class="google-search" placeholder="Google 검색">
+          <div style="min-width: 1200px;display: flex;width: 100%; justify-content: center;align-items: center;">
+            <img src="./20240706_163109.png"/>
+            <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google Logo" class="google-logo">
+            <img src="./20240706_163137.png"/>
+          </div>
+          <div style="display: flex;width: 100%; justify-content: center;min-width: 1200px;align-items: center;">
+            <img src="./20240706_163155.png"/>
+            <input type="text" class="google-search" placeholder="Google 검색">
+            <img src="./20240706_163206.png"/>
+          </div>
         </div>
       </section>
       <section class="main-section">
         <div class="main">
-          <div class="todo-list">
-            <div class="todo-header">
-              <h2>Today's goals</h2>
-              <button class="add-btn">&#43;</button>
-            </div>
-
-            <div class="todo-item">
+          <div class="todo-header">
+            <h2>Today's goals</h2>
+            <button class="add-btn">&#43;</button>
+          </div>
+          <div class="todo-list-wrapper">
+            <!-- <div class="todo-item">
               <button class="delete-btn" style="display: none;">Delete</button>
-            </div>
+            </div> -->
           </div>
         </div>
       </section>
@@ -34,22 +41,24 @@
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const todoList = document.querySelector('.todo-list');
+      const mainContainer = document.querySelector('.main');
+      const listWrapperContainer = document.querySelector('.todo-list-wrapper');
 
-      // 로컬 스토리지에서 할 일 목록 불러오기
-      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-      tasks.forEach(task => {
-        if (task.text.trim() !== '') {
+      function loadTasks() {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks.forEach(task => {
           addTodoItem(task.text, task.completed);
-        }
-      });
-
-      const addButton = document.querySelector('.add-btn');
-      addButton.addEventListener('click', function() {
-        addTodoItem();
-      });
+        });
+      }
 
       function addTodoItem(text = '', completed = false) {
+        let currentList = document.querySelector('.main > .todo-list-wrapper > .todo-list:last-child');
+        if (!currentList || currentList.children.length >= 5) {
+          currentList = document.createElement('div');
+          currentList.classList.add('todo-list');
+          listWrapperContainer.appendChild(currentList);
+        }
+
         const newItem = document.createElement('div');
         newItem.classList.add('todo-item');
         newItem.innerHTML = `
@@ -58,7 +67,7 @@
           <button class="more-btn">&#8942;</button>
           <button class="delete-btn" style="display: none;">Delete</button>
         `;
-        todoList.appendChild(newItem);
+        currentList.appendChild(newItem);
 
         // Ensure the input and buttons are correctly initialized
         const input = newItem.querySelector('.todo-input');
@@ -97,10 +106,40 @@
         });
 
         deleteButton.addEventListener('click', function() {
-          newItem.remove();
+          const item = newItem;
+          const list = item.parentNode;
+          const allLists = Array.from(document.querySelectorAll('.todo-list'));
+          let currentIndex = allLists.indexOf(list);
+
+          // 항목 삭제
+          item.remove();
           removeTask(input.value);
+
+          // 뒤에 있는 모든 리스트에서 첫 번째 항목을 현재 리스트로 이동
+          for (let i = currentIndex; i < allLists.length - 1; i++) {
+            const nextList = allLists[i + 1];
+            if (nextList && nextList.children.length > 0) {
+              const firstItem = nextList.children[0];
+              allLists[i].appendChild(firstItem);
+            }
+
+            // 만약 리스트가 비어있다면 제거
+            if (nextList.children.length === 0) {
+              nextList.remove();
+            }
+          }
+
+          // 현재 리스트가 비어있는지 다시 확인하고 제거
+          if (list.children.length === 0) {
+            list.remove();
+          }
         });
       }
+
+      const addButton = document.querySelector('.add-btn');
+      addButton.addEventListener('click', function() {
+        addTodoItem();
+      });
 
       function saveTask(input, completed) {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -118,6 +157,8 @@
         tasks = tasks.filter(task => task.text !== text);
         localStorage.setItem('tasks', JSON.stringify(tasks));
       }
+
+      loadTasks(); // Load tasks on page load
     });
 
     document.querySelector('.google-search').addEventListener('keypress', function(event) {
