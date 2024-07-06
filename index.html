@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>Document</title>
+</head>
+<body>
+  <div class="container">
+    <div class="section-container">
+      <section class="search-section">
+        <div class="header">
+          <input type="text" class="google-search" placeholder="Google 검색">
+        </div>
+      </section>
+      <section class="main-section">
+        <div class="main">
+          <div class="todo-list">
+            <div class="todo-header">
+              <h2>Today's goals</h2>
+              <button class="add-btn">&#43;</button>
+            </div>
+
+            <div class="todo-item">
+              <button class="delete-btn" style="display: none;">Delete</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const todoList = document.querySelector('.todo-list');
+
+      // 로컬 스토리지에서 할 일 목록 불러오기
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.forEach(task => {
+        if (task.text.trim() !== '') {
+          addTodoItem(task.text, task.completed);
+        }
+      });
+
+      const addButton = document.querySelector('.add-btn');
+      addButton.addEventListener('click', function() {
+        addTodoItem();
+      });
+
+      function addTodoItem(text = '', completed = false) {
+        const newItem = document.createElement('div');
+        newItem.classList.add('todo-item');
+        newItem.innerHTML = `
+          <button class="clover-btn ${completed ? 'active' : ''}" style="color: ${completed ? 'rgb(124, 247, 113)' : 'lightgray'}"><i class="fa-solid fa-clover"></i></button>
+          <input type="text" class="todo-input" placeholder="Add a new task" maxlength="50" value="${text}">
+          <button class="more-btn">&#8942;</button>
+          <button class="delete-btn" style="display: none;">Delete</button>
+        `;
+        todoList.appendChild(newItem);
+
+        const input = newItem.querySelector('.todo-input');
+        const cloverButton = newItem.querySelector('.clover-btn');
+        const moreButton = newItem.querySelector('.more-btn');
+        const deleteButton = newItem.querySelector('.delete-btn');
+
+        input.focus();
+
+        input.addEventListener('focusout', function() {
+          if (input.value.trim() === '') {
+            newItem.remove(); // 빈 입력 필드인 경우 DOM에서 제거
+          } else {
+            saveTask(input, cloverButton.classList.contains('active'));
+          }
+        });
+
+        cloverButton.addEventListener('click', function() {
+          const isActive = cloverButton.classList.contains('active');
+          cloverButton.classList.toggle('active');
+          cloverButton.style.animation = 'none'; // 애니메이션 초기화
+          setTimeout(() => {
+            if (isActive) {
+              // 완료 취소 애니메이션
+              cloverButton.style.animation = 'fill-down 2s ease forwards, splash-reverse 2s 2s forwards';
+            } else {
+              // 완료 애니메이션
+              cloverButton.style.animation = 'fill-up 2s ease forwards, splash 2s 2s forwards';
+            }
+          }, 10);
+          saveTask(input, !isActive);
+        });
+
+        moreButton.addEventListener('click', function() {
+          deleteButton.style.display = deleteButton.style.display === 'none' ? 'block' : 'none';
+        });
+
+        deleteButton.addEventListener('click', function() {
+          newItem.remove();
+          removeTask(input.value);
+        });
+      }
+
+      function saveTask(input, completed) {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const taskIndex = tasks.findIndex(t => t.text === input.value);
+        if (taskIndex > -1) {
+          tasks[taskIndex] = { text: input.value, completed };
+        } else {
+          tasks.push({ text: input.value, completed });
+        }
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      }
+
+      function removeTask(text) {
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks = tasks.filter(task => task.text !== text);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      }
+    });
+
+    document.querySelector('.google-search').addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        const query = this.value.trim();
+        if (query) {
+          window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
