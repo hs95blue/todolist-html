@@ -149,7 +149,6 @@ input[type="text"]:focus {
   cursor: pointer;
   transition: color 1s ease; /* 색상 변경 애니메이션 속도 조정 */
   animation-duration: 1s; /* 애니메이션 지속 시간을 0.8초로 늘림 */
-  animation: fill-up 1s ease forwards, splash 1s 1s forwards;
 }
 
 @keyframes fill-up {
@@ -190,6 +189,8 @@ input[type="text"]:focus {
 
 .clover-btn.active {
   color: rgb(124, 247, 113); /* 활성화 상태에서의 색상 */
+  animation: fill-up 1s ease forwards, splash 1s 1s forwards;
+
 }
 
 .delete-btn {
